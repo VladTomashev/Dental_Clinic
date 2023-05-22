@@ -26,8 +26,6 @@ namespace Dental_Clinic.service
             var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("superSecretKey123"));
             var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
             var tokeOptions = new JwtSecurityToken(
-                issuer: "https://localhost:5001",
-                audience: "https://localhost:5001",
                 claims: claims,
                 expires: DateTime.Now.AddMinutes(5),
                 signingCredentials: signinCredentials

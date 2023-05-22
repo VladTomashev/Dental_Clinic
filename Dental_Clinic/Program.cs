@@ -15,51 +15,43 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        builder.Services.AddAuthentication(opt =>
+        builder.Services.AddAuthentication("Bearer").AddJwtBearer(options =>
         {
-            opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        })
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = "https://localhost:5001",
-            ValidAudience = "https://localhost:5001",
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("superSecretKey123"))
-        };
-    });
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("superSecretKey123"))
+            };
+        });
 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(opt =>
         {
-            opt.SwaggerDoc("v1", new OpenApiInfo { Title = "MyAPI", Version = "v1" });
             opt.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
-                In = ParameterLocation.Header,
                 Description = "Please enter token",
+                BearerFormat = "JWT",
+                In = ParameterLocation.Header,
                 Name = "Authorization",
                 Type = SecuritySchemeType.Http,
-                BearerFormat = "JWT",
                 Scheme = "bearer"
             });
 
             opt.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
                 {
-                new OpenApiSecurityScheme
+                    new OpenApiSecurityScheme
                     {
-                    Reference = new OpenApiReference
+                        Reference = new OpenApiReference
                         {
-                        Type=ReferenceType.SecurityScheme,
-                        Id="Bearer"
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
                         }
                     },
-            new string[]{}
+                    new string[]{}
                 }
             });
         });
@@ -89,15 +81,9 @@ public class Program
 
         app.UseSwagger();
         app.UseSwaggerUI();
-
-        app.UseHttpsRedirection();
-
         app.UseAuthorization();
-
         app.MapControllers();
-
         app.Run();
-
     }
 }
 
